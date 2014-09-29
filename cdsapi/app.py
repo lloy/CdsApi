@@ -30,12 +30,12 @@ def setup_app(pecan_config=None):
     if not pecan_config:
         pecan_config = get_pecan_config()
 
-    pecan.configuration.set_config(dict(pecan_config), overwrite=True)
+    # pecan.configuration.set_config(dict(pecan_config), overwrite=True)
     # print pecan_config
     # print pecan_config.app.template_path
     # Replace DBHook with a hooks.TransactionHook
     app_hooks = [
-        hooks.DBHook()]
+        hooks.TasksHook()]
 
     app = pecan.make_app(
         pecan_config.app.root,

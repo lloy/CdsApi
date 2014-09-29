@@ -1,20 +1,41 @@
 # yes
-from pecan import hooks
-
-from cdsapi.common.impl_mysql import DriversDb
-
 
 __author__ = 'hardy.Zheng'
 __email__ = 'wei.zheng@yun-idc.com'
 
 
-class DBHook(hooks.PecanHook):
+from pecan import hooks
+
+from cdsapi.common.impl_mysql import TasksTable
+from cdsapi.common.impl_mysql import InstancesTable
+from cdsapi.common.impl_mysql import IpTable
+
+
+class InstancesHook(hooks.PecanHook):
 
     def __init__(self):
-        self.storage_connection = DriversDb()
+        self.storage_connection = InstancesTable()
 
     def before(self, state):
-        state.request.storage_conn = self.storage_connection
+        state.request.instancehook = self.storage_connection
+
+
+class TasksHook(hooks.PecanHook):
+
+    def __init__(self):
+        self.storage_connection = TasksTable()
+
+    def before(self, state):
+        state.request.taskhook = self.storage_connection
+
+
+class IpTableHook(hooks.PecanHook):
+
+    def __init__(self):
+        self.storage_connection = IpTable()
+
+    def before(self, state):
+        state.request.iphook = self.storage_connection
 
 
 class APIHook(hooks.PecanHook):

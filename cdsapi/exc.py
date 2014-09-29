@@ -1,27 +1,22 @@
+# yes
 
 __author__ = 'Hardy.zheng'
+__email__ = 'wei.zheng@yun-idc.com'
 
 
-class NovaClientInitError(Exception):
-    pass
-
-
-class AgentException(Exception):
+class ApiBase(Exception):
 
     def __init__(self, message, errno='0000-000-00'):
         self.msg = message
         self.code = errno
-        super(AgentException, self).__init__(self.msg, self.code)
+        super(ApiBase, self).__init__(self.msg, self.code)
 
 
-class RunNovaClientError(AgentException):
-
-    def __init__(self, message):
-        errno = '0000-005-01'
-        super(RunNovaClientError, self).__init__(message, errno)
+class NotFound(ApiBase):
+    pass
 
 
-class ConfigureException(AgentException):
+class ConfigureException(ApiBase):
 
     """
     errno = 0000-001-00
@@ -42,7 +37,7 @@ class SetPollerError(Exception):
     pass
 
 
-class NotRunMethod(AgentException):
+class NotRunMethod(ApiBase):
     """
     errno = 0000-003-01
     """
@@ -51,26 +46,3 @@ class NotRunMethod(AgentException):
 
 class NotFoundConfigureFile(Exception):
     pass
-
-
-class MultipleResultsFound(AgentException):
-    pass
-
-
-class NoResultFound(AgentException):
-    pass
-
-
-class BadVersion(AgentException):
-    """ code: 0000-000-02 """
-    pass
-
-
-class BadAggregate(Exception):
-    pass
-
-
-class IsLock(AgentException):
-    def __init__(self, message):
-        errno = '0000-006-01'
-        super(IsLock, self).__init__(message, errno)

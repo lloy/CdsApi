@@ -20,7 +20,18 @@
 
 import sys
 
-from cds.cli import api
+from cdsapi.cli import api
+from optparse import OptionParser
+
+
+parser = OptionParser()
+parser.add_option("-c", "--config", dest="filename",
+                  help="cds agent configure file",
+                  metavar="FILE")
+
 
 if __name__ == '__main__':
-    sys.exit(api())
+    (options, args) = parser.parse_args()
+    if not options.filename:
+        parser.error("not input config file, --config filename")
+    sys.exit(api(options.filename))

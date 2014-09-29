@@ -24,25 +24,23 @@ from setuptools import setup, find_packages
 # solution from: http://bugs.python.org/issue15881#msg170215
 
 setup(
-    name='cdsApi',
+    name='cdsapi',
     version='1.0',
-    description='CdsApi',
+    description='cdsapi',
     author='hardy.Zheng',
     author_email='wei.zheng@yun-idc.com',
     install_requires=[
-        'oslo.config>=1.2.1',
         'pecan>=0.4.5',
-        'oslo.messaging>=1.3.0',
         'lxml>=2.3',
         'jsonschema>=2.0.0,<3.0.0',
         'jsonpath-rw>=1.2.0,<2.0',
         'anyjson>=0.3.3'
         ],
 
-    packages=find_packages('cds'),
-    package_dir={'': 'cds'},
-    namespace_packages=['cds'],
-    scripts=['cds/cds-agent'],
-    data_files=[('etc', ['cds/etc/api_paste.ini'])],
+    packages=find_packages(),
+    # package_dir={'': 'api'},
+    namespace_packages=['cdsapi'],
+    scripts=['cds-agent'],
+    data_files=[('etc', ['etc/api_paste.ini'])],
     include_package_data=True
     )

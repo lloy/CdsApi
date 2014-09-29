@@ -27,6 +27,10 @@ _DEFAULT_CONFIG = {
         'passwd': '123456',
         'name': 'apicloud',
         'driver': 'driver',
+        'tasks': 'tasks',
+        'iptable': 'iptable',
+        'template': 'template',
+        'instances': 'instances',
         'iaas': 'iaas'},
     'driver': {
         'iaas': 'openstack, vsphere',

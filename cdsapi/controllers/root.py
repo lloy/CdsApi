@@ -17,17 +17,20 @@
 
 import pecan
 
-from cdsapi.controllers.driver import DriverController
-from cdsapi.controllers.instances import InstancesController
+# from cdsapi.controllers.driver import DriverController
+# from cdsapi.controllers.instances import InstancesController
+from cdsapi.controllers.tasks import TasksController
+# from cdsapi.controllers.iptable import IpTableController
 
 
 class RootController(object):
 
-    drivers = DriverController()
-    instances = InstancesController()
+    # drivers = DriverController()
+    # instances = InstancesController()
+    tasks = TasksController()
+    # iptable = IpTableController()
 
-    # @pecan.expose(generic=True, template='index.html')
-    @pecan.expose(generic=True)
+    @pecan.expose(generic=True, template='index.html')
+    # @pecan.expose(generic=True)
     def index(self):
-        return "Welcome to store.example.com!"
-        # return dict()
+        return dict()

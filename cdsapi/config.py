@@ -21,5 +21,5 @@ app = {
     'root': 'cdsapi.controllers.root.RootController',
     'modules': ['cdsapi'],
     'static_root': '%(confdir)s/public',
-    'template_path': '%(confdir)s/templates',
+    'template_path': '%(confdir)s/cdsapi/templates',
 }
