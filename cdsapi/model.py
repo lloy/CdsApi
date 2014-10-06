@@ -48,6 +48,14 @@ class _Base(object):
         return set(fields) - set(["self"])
 
 
+class TaskUuid(_Base):
+    task_id = wtypes.text
+
+    @classmethod
+    def from_model(cls, task_id):
+        return cls(task_id=task_id)
+
+
 class Driver(_Base):
 
     name = wtypes.text
@@ -66,12 +74,17 @@ class IpTable(_Base):
     is_alloc = wsme.wsattr(bool, default=False)
 
 
-class Template(_Base):
-    template_name = wtypes.text
+class InstancesType(_Base):
+    name = wtypes.text
     core_num = int
     ram = int
     disk = int
     extend_disk = int
+
+
+class TemplateType(_Base):
+    iaas_type = wtypes.text
+    image_type = wtypes.text
 
 
 class Instances(_Base):
@@ -82,18 +95,34 @@ class Instances(_Base):
     # across api set action in [add, delete]
     status = wtypes.text
     # across agent set action value in [None, delete, deleting]
-    template_type = wtypes.text  # suporrt only two kinds of iaas, [vsphere, openstack]
     os_type = wtypes.text
+    template_type = wtypes.text  # suporrt image  eg:[ubuntu, centos...]
+    model_type = wtypes.text  # InstancesType
     username = wtypes.text
     passwd = wtypes.text
-    time = {wtypes.text: wtypes.text}  # online_time, off_time, create_time
+    # time = {wtypes.text: wtypes.text}  # online_time, off_time, create_time
     iaas_type = wtypes.text
     customers = wtypes.text
+    # options = {wtypes.text: wtypes.text}
+
+    @classmethod
+    def from_db_model(cls, m):
+        return cls(instance_uuid=m[0],
+                   name=m[2],
+                   ip=m[3],
+                   status=m[4],
+                   os_type=m[5],
+                   username=m[6],
+                   passwd=m[7],
+                   template_type=m[8],
+                   instance_type=m[9],
+                   iaas_type=m[10],
+                   customers=m[11])
 
 
-class Tasks(_Base):
+class Tasks(TaskUuid):
 
-    task_id = wtypes.text  # task id
+    # task_id = wtypes.text  # task id
     create_time = datetime.datetime  # create time
     template_type = wtypes.text  # Instances template type , eg: large, tiny, small
     model_type = wtypes.text
@@ -112,3 +141,4 @@ class Tasks(_Base):
                    instances_num=m[5],
                    completed_num=completed_num,
                    completed_instances=instances)
+

@@ -1,11 +1,11 @@
 # yes
-import json
+import simplejson as json
 import logging
 
 from lxml import etree
 import webob
 
-from cdsapi import hooks
+# from cdsapi import hooks
 from cdsapi.common import gettextutils
 
 
@@ -58,7 +58,9 @@ class ParsableErrorMiddleware(object):
                 state['headers'] = headers
                 return start_response(status, headers, exc_info)
 
-        app_iter = self.app(environ, replacement_start_response)
+        appiter = self.app(environ, replacement_start_response)
+        app_iter = self.format_exception(appiter)
+
         if (state['status_code'] / 100) not in (2, 3):
             req = webob.Request(environ)
             error = None
@@ -97,3 +99,27 @@ class ParsableErrorMiddleware(object):
             body = app_iter
         LOG.debug('body:%s' % body)
         return body
+
+    def format_exception(self, excinfo):
+        LOG.debug('excinfo format before: %s' % excinfo)
+        app_result = []
+        src_excinfo = excinfo
+        try:
+            if excinfo and len(excinfo) == 1:
+                exc_info = json.loads(excinfo[0])
+                LOG.debug('exc_info: %s' % exc_info)
+                exc_faultstring = json.loads(exc_info.pop('faultstring'))
+                LOG.debug('exc_faultstring : %s' % exc_faultstring)
+                error_msg = dict(
+                    debuginfo=unicode(exc_info['debuginfo']),
+                    faultcode=unicode(exc_faultstring['faultcode']),
+                    faultstring=unicode(exc_faultstring['msg']))
+
+                error_msg = json.dumps(error_msg)
+                LOG.debug('excinfo format after: %s' % str(error_msg))
+                app_result.append(error_msg)
+                return app_result
+            else:
+                return src_excinfo
+        except Exception:
+            return src_excinfo

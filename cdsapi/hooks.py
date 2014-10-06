@@ -9,6 +9,7 @@ from pecan import hooks
 from cdsapi.common.impl_mysql import TasksTable
 from cdsapi.common.impl_mysql import InstancesTable
 from cdsapi.common.impl_mysql import IpTable
+from cdsapi.common.impl_mysql import TemplateTable
 
 
 class InstancesHook(hooks.PecanHook):
@@ -36,6 +37,15 @@ class IpTableHook(hooks.PecanHook):
 
     def before(self, state):
         state.request.iphook = self.storage_connection
+
+
+class TemplateHook(hooks.PecanHook):
+
+    def __init__(self):
+        self.storage_connection = TemplateTable()
+
+    def before(self, state):
+        state.request.templatehook = self.storage_connection
 
 
 class APIHook(hooks.PecanHook):

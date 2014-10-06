@@ -35,7 +35,10 @@ def setup_app(pecan_config=None):
     # print pecan_config.app.template_path
     # Replace DBHook with a hooks.TransactionHook
     app_hooks = [
-        hooks.TasksHook()]
+        hooks.TasksHook(),
+        hooks.IpTableHook(),
+        hooks.TemplateHook(),
+        hooks.InstancesHook()]
 
     app = pecan.make_app(
         pecan_config.app.root,

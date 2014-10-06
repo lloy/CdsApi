@@ -6,7 +6,7 @@ use apicloud;
 drop table if exists tasks; 
 create table tasks(
     task_id varchar(40) NOT NULL,
-	createtime DATETIME NOT NULL,
+	create_time DATETIME NOT NULL,
     template_type varchar(16) NOT NULL,
     model_type varchar(16) NOT NULL,
     status varchar(16) NOT NULL,
@@ -17,6 +17,7 @@ create table tasks(
 drop table if exists instances; 
 create table instances(
     instance_uuid varchar(40) NOT NULL,
+    task_id varchar(40) NOT NULL,
     name varchar(40) NOT NULL,
     ip varchar(40) NOT NULL,
     status varchar(40) NOT NULL,
@@ -24,6 +25,7 @@ create table instances(
     username varchar(40) NOT NULL,
     passwd varchar(40) NOT NULL,
     template_type varchar(16) NOT NULL,
+    instance_type varchar(16) NOT NULL,
     iaas_type varchar(16) NOT NULL,
     customers varchar(16) NOT NULL,
 	create_time DATETIME NOT NULL,
@@ -32,14 +34,21 @@ create table instances(
 	PRIMARY KEY (instance_uuid)
 );
 
-drop table if exists template; 
-create table template(
-    template_name varchar(24) NOT NULL,
+drop table if exists instancetype; 
+create table instancetype(
+    name varchar(24) NOT NULL,
     core_num INT UNSIGNED NOT NULL,
     ram INT UNSIGNED NOT NULL,
     disk INT UNSIGNED NOT NULL,
     extend_disk INT UNSIGNED NOT NULL,
-    PRIMARY KEY (template_name)
+    PRIMARY KEY (name)
+);
+
+drop table if exists templatetype; 
+create table templatetype(
+    name varchar(24) NOT NULL,
+    iaas_type varchar(24) NOT NULL,
+    PRIMARY KEY (name)
 );
 
 

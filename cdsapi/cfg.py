@@ -29,8 +29,9 @@ _DEFAULT_CONFIG = {
         'driver': 'driver',
         'tasks': 'tasks',
         'iptable': 'iptable',
-        'template': 'template',
         'instances': 'instances',
+        'instancetype': 'instancetype',
+        'template': 'templatetype',
         'iaas': 'iaas'},
     'driver': {
         'iaas': 'openstack, vsphere',

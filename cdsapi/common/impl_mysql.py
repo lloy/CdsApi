@@ -9,7 +9,7 @@ import logging
 from MySQLdb import Error as MySqlError
 
 from cdsapi import cfg
-from cdsapi.exc import NotFound
+from cdsapi import exc
 
 
 CONF = cfg.CONF
@@ -41,8 +41,11 @@ class _MysqlBase(object):
             self.cur.execute(cmd)
             return self.cur.fetchall()
         except Exception, e:
-            LOG.error(str(e))
+            LOG.debug(str(e))
             raise MySqlError(str(e))
+
+    def _isfound(self, id):
+        raise NotImplementedError('_MysqlBase _isfound Not Implemented')
 
 
 class TasksTable(_MysqlBase):
@@ -50,13 +53,45 @@ class TasksTable(_MysqlBase):
     table = CONF.db.tasks
 
     def get(self, task_id):
-        cmd = "select * from %s where task_id='%s'" % (self.table, task_id)
+        cmd = "select * from %s where task_id=\"%s\"" % (self.table, task_id)
         LOG.debug('tasks GET command: %s ' % cmd)
         tasks = self.runCommand(cmd)
         if tasks:
             return tasks
         else:
-            raise NotFound('not found task: %s' % task_id, '01202')
+            LOG.debug("Empty set")
+            return None
+
+    def add(self, **kwargv):
+        """
+        kwargv parms:
+            task_id: task uniquely identifies
+            create_time: task create time
+            template_type: instance template type
+            model_type: instance type
+            status: task status
+            instances_num: create instance number
+        """
+        if self._isfound(kwargv['task_id']):
+            return False
+        cmd = "insert into %s (task_id, create_time, template_type, model_type,\
+               status, instances_num) values(\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",%d)" \
+               % (self.table,
+                  kwargv['task_id'],
+                  kwargv['create_time'],
+                  kwargv['template_type'],
+                  kwargv['model_type'],
+                  kwargv['status'],
+                  kwargv['instances_num'])
+        LOG.debug('TasksTable add cmd : %s' % cmd)
+        self.runCommand(cmd)
+        self.conn.commit()
+
+    def _isfound(self, task_id):
+        if self.get(task_id):
+            return True
+        else:
+            return False
 
 
 class InstancesTable(_MysqlBase):
@@ -68,37 +103,95 @@ class InstancesTable(_MysqlBase):
         LOG.debug('instances GET_ALL cmd: %s' % cmd)
         instances = self.runCommand(cmd)
         if not instances:
-            raise NotFound('Not a instance in Cds', '00202')
+            raise exc.NotFound('Not a instance in Cds', '00202')
+        return instances
+
+    def get(self, instance_uuid):
+        cmd = "select * from %s where instance_uuid=\"%s\"" % (self.table, instance_uuid)
+        instance = self.runCommand(cmd)
+        LOG.debug("storage in mysql instance: %s" % str(instance))
+        if not instance:
+            LOG.error('NotFound instance %s' % instance_uuid)
+            raise exc.NotFound('NotFound instance %s' % instance_uuid)
+        return instance
+
+    def getInstancesfromtask_id(self, task_id):
+        cmd = "select * from %s where task_id=\"%s\" and status=\"OK\"" % (self.table, task_id)
+        LOG.debug('getInstancesfromtask_id cmd %s' % cmd)
+        instances = self.runCommand(cmd)
+        LOG.debug('instances: %s' % str(instances))
+        if not instances:
+            return None
         return instances
 
     def add(self, **kwargv):
-        pass
+        """
+        kwargv parms:
+            instance_uuid: instance uniquely identifies
+            name: instance name
+            ip: instance ipaddress
+            status: instance status, [running, stop, error, deleting, lanuching]
+            os_type: instance system type
+            username: instance user name
+            passwd: instance user password
+            template_type: instance template_type: TemplateType
+            instance_type: instance type: InstancesType
+            iaas_type: iaas type eg: openstack, vsphere
+            customers: 1haodian
+            create_time: instance create time
+            online_time: instance login time
+            off_time: instance show down time
+        """
+        raise NotImplementedError('instance add interface Not Implemented')
 
     def update(self, **kwargv):
-        pass
+        """
+        parms the same as add interface
+        """
+
+        raise NotImplementedError('instance add interface Not Implemented')
 
     def delete(self, instance_uuid):
-        pass
+        cmd = "update %s set status=\"deleting\" where instance_uuid=\"%s\""\
+              % (self.table, instance_uuid)
+        LOG.debug("instance delete cmd %s" % cmd)
+        if self._isfound(instance_uuid):
+            self.runCommand(cmd)
+            self.conn.commit()
+
+    def _isfound(self, instance_uuid):
+        if self.get(instance_uuid):
+            return True
+        else:
+            return False
 
 
 class IpTable(_MysqlBase):
 
     table = CONF.db.iptable
 
-    def get_all(self, customers):
-        pass
+    def get_all(self, flag):
+        if flag == 'ALL':
+            cmd = "select ipaddress from %s " % self.table
+        if flag == 'ALLOC':
+            cmd = "select ipaddress from %s where is_alloc= %d" % (self.table, 1)
+        if flag == 'UN_ALLOC':
+            cmd = "select ipaddress from %s where is_alloc= %d" % (self.table, 0)
+        ipaddress = self.runCommand(cmd)
+        if not ipaddress:
+            raise exc.NotFound('Not a ipaddress')
 
     def get(self):
         raise NotImplementedError('IpTable get interface Not Implemented')
 
     def add(self, **kwargv):
-        pass
+        raise NotImplementedError('IpTable add interface Not Implemented')
 
     def update(self, **kwargv):
-        pass
+        raise NotImplementedError('IpTable update interface Not Implemented')
 
     def delete(self, ipaddress):
-        pass
+        raise NotImplementedError('IpTable delete interface Not Implemented')
 
 
 class TemplateTable(_MysqlBase):
@@ -108,7 +201,13 @@ class TemplateTable(_MysqlBase):
         raise NotImplementedError('Template get interface Not Implemented')
 
     def get(self, name):
-        pass
+        cmd = "select * from %s where name=\"%s\"" % (self.table, name)
+        LOG.debug('TemplateTable cmd %s' % cmd)
+        template = self.runCommand(cmd)
+        if template:
+            return template
+        else:
+            return None
 
     def add(self, **kwargv):
         pass
