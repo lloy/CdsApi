@@ -40,7 +40,7 @@ setup(
     packages=find_packages(),
     # package_dir={'': 'api'},
     namespace_packages=['cdsapi'],
-    scripts=['cds-agent'],
+    scripts=['cds-api'],
     data_files=[('etc', ['etc/api_paste.ini'])],
     include_package_data=True
     )
