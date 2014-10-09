@@ -30,12 +30,14 @@ setup(
     author='hardy.Zheng',
     author_email='wei.zheng@yun-idc.com',
     install_requires=[
-        'pecan>=0.4.5',
         'lxml>=2.3',
+        'pecan>=0.4.5',
+        'WSME>=0.6',
+        'WebOb>=1.2.3',
+        'six>=1.7.0',
         'jsonschema>=2.0.0,<3.0.0',
         'jsonpath-rw>=1.2.0,<2.0',
-        'anyjson>=0.3.3'
-        ],
+        'anyjson>=0.3.3'],
 
     packages=find_packages(),
     # package_dir={'': 'api'},

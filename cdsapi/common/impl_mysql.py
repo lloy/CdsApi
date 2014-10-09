@@ -19,20 +19,49 @@ LOG = logging.getLogger(__name__)
 class _MysqlBase(object):
     def __init__(self):
         try:
-            self.conn = MySQLdb.connect(
+            self.conn = self._conn()
+            self.cur = None
+            self.set()
+        except MySQLdb.Error, e:
+            LOG.error(str(e))
+
+    def _conn(self):
+        try:
+            return MySQLdb.Connection(
                 host=CONF.db.host,
                 user=CONF.db.user,
                 passwd=CONF.db.passwd,
                 db=CONF.db.name,
                 port=int(CONF.db.port))
-            self.cur = self.conn.cursor()
+        except MySQLdb.Error, e:
+            LOG.error(str(e))
+            return None
+
+    def set(self):
+        try:
+            if self.conn:
+                self.cur = self.conn.cursor()
         except MySQLdb.Error, e:
             self.conn = None
+            self.cur = None
             LOG.error(str(e))
 
+    def reconn(self):
+        self.conn = self._conn()
+        self.set()
+
+    def refresh(self):
+        self.clear()
+        self.reconn()
+        self.set()
+
     def clear(self):
-        self.cur.close()
-        self.conn.close()
+        if self.cur:
+            self.cur.close()
+            self.cur = None
+        if self.conn:
+            self.conn.close()
+            self.conn = None
 
     def runCommand(self, cmd):
         try:
@@ -55,6 +84,7 @@ class TasksTable(_MysqlBase):
     def get(self, task_id):
         cmd = "select * from %s where task_id=\"%s\"" % (self.table, task_id)
         LOG.debug('tasks GET command: %s ' % cmd)
+        self.refresh()
         tasks = self.runCommand(cmd)
         if tasks:
             return tasks
@@ -101,6 +131,7 @@ class InstancesTable(_MysqlBase):
     def list(self, customers):
         cmd = "select * from %s where customers='%s'" % (self.table, customers)
         LOG.debug('instances GET_ALL cmd: %s' % cmd)
+        self.refresh()
         instances = self.runCommand(cmd)
         if not instances:
             raise exc.NotFound('Not a instance in Cds', '00202')
@@ -108,16 +139,18 @@ class InstancesTable(_MysqlBase):
 
     def get(self, instance_uuid):
         cmd = "select * from %s where instance_uuid=\"%s\"" % (self.table, instance_uuid)
+        self.refresh()
         instance = self.runCommand(cmd)
         LOG.debug("storage in mysql instance: %s" % str(instance))
         if not instance:
             LOG.error('NotFound instance %s' % instance_uuid)
-            raise exc.NotFound('NotFound instance %s' % instance_uuid)
+            raise exc.NotFound('NotFound instance %s' % instance_uuid, '00301')
         return instance
 
     def getInstancesfromtask_id(self, task_id):
         cmd = "select * from %s where task_id=\"%s\" and status=\"OK\"" % (self.table, task_id)
         LOG.debug('getInstancesfromtask_id cmd %s' % cmd)
+        self.refresh()
         instances = self.runCommand(cmd)
         LOG.debug('instances: %s' % str(instances))
         if not instances:
@@ -177,9 +210,10 @@ class IpTable(_MysqlBase):
             cmd = "select ipaddress from %s where is_alloc= %d" % (self.table, 1)
         if flag == 'UN_ALLOC':
             cmd = "select ipaddress from %s where is_alloc= %d" % (self.table, 0)
+        self.refresh()
         ipaddress = self.runCommand(cmd)
         if not ipaddress:
-            raise exc.NotFound('Not a ipaddress')
+            raise exc.NotFound('Not a ipaddress', '03001')
 
     def get(self):
         raise NotImplementedError('IpTable get interface Not Implemented')
@@ -203,6 +237,7 @@ class TemplateTable(_MysqlBase):
     def get(self, name):
         cmd = "select * from %s where name=\"%s\"" % (self.table, name)
         LOG.debug('TemplateTable cmd %s' % cmd)
+        self.refresh()
         template = self.runCommand(cmd)
         if template:
             return template
