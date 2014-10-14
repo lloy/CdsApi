@@ -138,7 +138,6 @@ class Tasks(TaskUuid):
                    template_type=m[2],
                    model_type=m[3],
                    status=m[4],
-                   instances_num=m[5],
+                   instances_num=m[6],
                    completed_num=completed_num,
                    completed_instances=instances)
-
