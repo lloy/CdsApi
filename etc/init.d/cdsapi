@@ -1,0 +1,44 @@
+#!/bin/sh
+#
+
+# chkconfig: 2345 18 82
+# description "cdsapi"
+
+set -e 
+
+NAME=cds-api
+PIDFILE=/var/run/$NAME.pid
+DAEMON=/usr/local/bin/$NAME
+
+#DAEMON_OPTS="--baz=quux"
+DAEMON_OPTS="--config=/etc/cdsapi/apicloud.cfg"
+
+export PATH="${PATH:+$PATH:}/usr/sbin:/sbin"
+. /lib/lsb/init-functions
+
+test -f $DAEMON || exit 0
+
+case "$1" in
+    start)
+        log_daemon_msg  "Start Service $NAME.."
+        start-stop-daemon -S -q -b -m -p $PIDFILE --exec $DAEMON -- $DAEMON_OPTS 
+	log_end_msg $?
+        ;;
+    stop)
+        log_daemon_msg  "Stop Service $NAME.."
+        start-stop-daemon -K -q -p $PIDFILE 
+	log_end_msg $?
+        ;;
+    status)
+        status_of_proc -p $PIDFILE $DAEMON cds-agent exit 0 || exit $?
+        ;;
+    restart)
+        log_daemon_msg "Restarting service $NAME.."
+        start-stop-daemon -K -q -p $PIDFILE 
+        start-stop-daemon -S -q -b -m -p $PIDFILE --exec $DAEMON -- $DAEMON_OPTS 
+	log_end_msg $?
+        ;;
+    *):
+        echo "Usage: $1 {start|stop|status|restart}"
+        exit 2
+esac
