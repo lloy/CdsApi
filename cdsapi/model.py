@@ -91,6 +91,7 @@ class Instances(_Base):
 
     instance_uuid = wtypes.text
     name = wtypes.text
+    hostname = wtypes.text
     ip = wtypes.text
     # across api set action in [add, delete]
     status = wtypes.text
@@ -107,8 +108,17 @@ class Instances(_Base):
 
     @classmethod
     def from_db_model(cls, m):
+        l = []
+        vsphere_instance_name = m[2]
+        if vsphere_instance_name:
+            name = vsphere_instance_name.split('-', 6)
+            l.append(name[0])
+            l.append(name[6])
+            instance_name = '-'.join(l)
+
         return cls(instance_uuid=m[0],
-                   name=m[2],
+                   name=vsphere_instance_name,
+                   hostname=instance_name,
                    ip=m[3],
                    status=m[4],
                    os_type=m[5],
