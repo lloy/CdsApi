@@ -15,6 +15,7 @@ from MySQLdb import Error as MySqlError
 
 from cdsapi.model import Instances
 from cdsapi.model import TaskUuid
+from cdsapi.model import Query
 from cdsapi import exc
 
 
@@ -25,11 +26,32 @@ TASKS_STATUS = ('OK', 'PROCESSING', 'ERROR')
 
 class InstancesController(rest.RestController):
 
-    @wsme_pecan.wsexpose([Instances])
-    def get_all(self):
+    def _query_to_kwargs(self, query):
+        kw = {}
+        for q in query:
+            if q.op == 'eq':
+                if q.field == 'model_type':
+                    kw['instance_type'] = q.value
+                elif q.field == 'customers':
+                    continue
+                else:
+                    kw[q.field] = q.value
+            elif q.op == 'lt' or q.op == 'gt':
+                # lt and gt options Not implementation
+                pass
+            elif q.op == 'le' or q.op == 'ge':
+                # le and ge options Not implementation
+                pass
+        return kw
 
+    @wsme_pecan.wsexpose([Instances], [Query])
+    def get_all(self, q=None):
+
+        query = q or []
+        kwargs = self._query_to_kwargs(query)
+        LOG.debug("INPUT ARGS :%s" % kwargs)
         instances = []
-        for ins in request.instancehook.list('1hao'):
+        for ins in request.instancehook.list('1hao', **kwargs):
             instances.append(Instances.from_db_model(ins))
         return instances
 

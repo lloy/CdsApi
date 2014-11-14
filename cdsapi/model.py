@@ -7,11 +7,14 @@ __email__ = 'wei.zheng@yun-idc.com'
 import inspect
 import logging
 import wsme
+import ast
+import six
 import datetime
 from wsme import types as wtypes
 
 
 LOG = logging.getLogger(__name__)
+operation_kind = wtypes.Enum(str, 'lt', 'le', 'eq', 'ne', 'ge', 'gt')
 
 
 class _Base(object):
@@ -46,6 +49,50 @@ class _Base(object):
     def get_field_names(cls):
         fields = inspect.getargspec(cls.__init__)[0]
         return set(fields) - set(["self"])
+
+
+class Query(_Base):
+    """Query filter."""
+
+    # The data types supported by the query.
+    _supported_types = ['integer', 'float', 'string']
+
+    # Functions to convert the data field to the correct type.
+    _type_converters = {'integer': int,
+                        'float': float,
+                        'string': six.text_type}
+
+    _op = None  # provide a default
+
+    def get_op(self):
+        return self._op or 'eq'
+
+    def set_op(self, value):
+        self._op = value
+
+    field = wtypes.text
+    "The name of the field to test"
+
+    # op = wsme.wsattr(operation_kind, default='eq')
+    # this ^ doesn't seem to work.
+    op = wsme.wsproperty(operation_kind, get_op, set_op)
+    "The comparison operator. Defaults to 'eq'."
+
+    value = wtypes.text
+    "The value to compare against the stored data"
+
+    type = wtypes.text
+    "The data type of value to compare against the stored data"
+
+    def __repr__(self):
+        # for logging calls
+        return '<Query %r %s %r %s>' % (self.field,
+                                        self.op,
+                                        self.value,
+                                        self.type)
+
+    def as_dict(self):
+        return self.as_dict_from_keys(['field', 'op', 'type', 'value'])
 
 
 class TaskUuid(_Base):

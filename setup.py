@@ -33,6 +33,7 @@ setup(
         'lxml>=2.3',
         'pecan>=0.4.5',
         'WSME>=0.6',
+        'six>=1.7.0',
         'PasteDeploy>=1.5.0',
         'paste>=1.7',
         'babel>=0.8',

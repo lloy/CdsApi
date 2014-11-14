@@ -129,8 +129,13 @@ class InstancesTable(_MysqlBase):
 
     table = CONF.db.instances
 
-    def list(self, customers):
+    def list(self, customers, **kw):
         cmd = "select * from %s where customers='%s'" % (self.table, customers)
+        if kw:
+            search_string = ''
+            for k, v in kw.items():
+                search_string += "and %s=\"%s\"" % (k, v)
+            cmd += search_string
         LOG.debug('instances GET_ALL cmd: %s' % cmd)
         self.refresh()
         instances = self.runCommand(cmd)
