@@ -105,7 +105,7 @@ class TasksTable(_MysqlBase):
         if self._isfound(kwargv['task_id']):
             return False
         cmd = "insert into %s (task_id, create_time, template_type, model_type,\
-               status, is_run, instances_num) values(\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",%d, %d)" \
+               status, is_run, instances_num, flag) values(\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",%d, %d,\"%s\")" \
                % (self.table,
                   kwargv['task_id'],
                   kwargv['create_time'],
@@ -113,7 +113,8 @@ class TasksTable(_MysqlBase):
                   kwargv['model_type'],
                   kwargv['status'],
                   0,
-                  kwargv['instances_num'])
+                  kwargv['instances_num'],
+                  kwargv['flag'])
         LOG.debug('TasksTable add cmd : %s' % cmd)
         self.runCommand(cmd)
         self.conn.commit()

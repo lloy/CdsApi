@@ -48,6 +48,6 @@ setup(
     # package_dir={'': 'api'},
     namespace_packages=['cdsapi'],
     scripts=['cds-api'],
-    data_files=[('etc', ['etc/api_paste.ini'])],
+    # data_files=[('etc', ['etc/api_paste.ini'])],
     include_package_data=True
     )

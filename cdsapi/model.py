@@ -7,7 +7,6 @@ __email__ = 'wei.zheng@yun-idc.com'
 import inspect
 import logging
 import wsme
-import ast
 import six
 import datetime
 from wsme import types as wtypes
@@ -97,6 +96,7 @@ class Query(_Base):
 
 class TaskUuid(_Base):
     task_id = wtypes.text
+    template_type = wtypes.text
 
     @classmethod
     def from_model(cls, task_id):
@@ -148,6 +148,7 @@ class Instances(_Base):
     model_type = wtypes.text  # InstancesType
     username = wtypes.text
     passwd = wtypes.text
+    flag = wtypes.text
     # time = {wtypes.text: wtypes.text}  # online_time, off_time, create_time
     iaas_type = wtypes.text
     customers = wtypes.text
@@ -162,6 +163,8 @@ class Instances(_Base):
             l.append(name[0])
             l.append(name[6])
             instance_name = '-'.join(l)
+        LOG.debug('zhengwei T: %s' % str(m))
+        LOG.debug('zhengwei Tflag: %s' % str(m[16]))
 
         return cls(instance_uuid=m[0],
                    name=vsphere_instance_name,
@@ -174,7 +177,8 @@ class Instances(_Base):
                    template_type=m[8],
                    instance_type=m[9],
                    iaas_type=m[10],
-                   customers=m[11])
+                   customers=m[11],
+                   flag=m[16] or None)
 
 
 class Tasks(TaskUuid):
@@ -184,6 +188,7 @@ class Tasks(TaskUuid):
     template_type = wtypes.text  # Instances template type , eg: large, tiny, small
     model_type = wtypes.text
     status = wtypes.text  # task status [OK, PROCESSING, ERROR]
+    flag = wtypes.text  # flag is "fixable" or "unfixable"
     instances_num = int  # in this task has instances_num instances
     completed_num = int  # in processing already completed instances number
     completed_instances = [Instances]  # already completed instances detail
@@ -197,4 +202,5 @@ class Tasks(TaskUuid):
                    status=m[4],
                    instances_num=m[6],
                    completed_num=completed_num,
+                   flag=m[7],
                    completed_instances=instances)
