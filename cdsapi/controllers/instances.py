@@ -55,8 +55,8 @@ class InstancesController(rest.RestController):
             instances.append(Instances.from_db_model(ins))
         return instances
 
-    @wsme_pecan.wsexpose(TaskUuid, wtypes.text, wtypes.text, int)
-    def post(self, model_type, template_type, instances_num):
+    @wsme_pecan.wsexpose(TaskUuid, wtypes.text, wtypes.text, int, wtypes.text)
+    def post(self, model_type, template_type, instances_num, flag):
         # start_ipaddress = '20.1.10.1'
         """
         parms
@@ -65,11 +65,13 @@ class InstancesController(rest.RestController):
             template_type: instance template type
             model_type: instance type
             status: task status
+            flag: fixable or unfixable
             instances_num: create instance number
         """
         LOG.debug('model_type: %s' % model_type)
         LOG.debug('template_type: %s' % template_type)
         LOG.debug('instances_num: %s' % instances_num)
+        LOG.debug('flag: %s' % flag)
         if not request.templatehook.get(template_type):
             raise exc.NotSupportType('Not Support template %s' % template_type, '00002')
 
@@ -80,6 +82,7 @@ class InstancesController(rest.RestController):
                   create_time=timestamp,
                   template_type=template_type,
                   model_type=model_type,
+                  flag=flag,
                   status=TASKS_STATUS[1],
                   instances_num=instances_num
                   )
