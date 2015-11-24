@@ -1,0 +1,11 @@
+flag: fixable or unfixable 
+
+fixable: 表示长期使用
+unfixable: 表示短期使用
+
+{
+    "template_type":"centos6.4",
+    "model_type":"8-8-120",
+    "instances_num":2,
+    "flag":"fixable"
+}

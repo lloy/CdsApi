@@ -1,0 +1,2 @@
+条件查询样本
+http://127.0.0.1:5022/instances?q.field=model_type&q.field=os_type&q.op=aa&q.op=eq&q.value=8-8192-40&q.value=centos6.4
