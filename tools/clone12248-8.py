@@ -358,7 +358,7 @@ class Instance(object):
 
 
 # reconfigure host
-def reconfigure(instance, name, ip, gateway, flag, ipflag):
+def reconfigure(instance, name, ip, gateway, flag, ipflag, model_type):
     try:
         # set system type
         yhd_os_type = "centos"
@@ -394,7 +394,7 @@ def reconfigure(instance, name, ip, gateway, flag, ipflag):
         # login host pass Telnet
         tl = TLogin(TEMPLATE_HOST, custom_username, custom_password, timeout=20)
         instance.alloc_ip(ip)
-        cmd, ip = instance._get_cmd(name, ip, ipflag)
+        cmd, ip = instance._get_cmd(name, ip, ipflag, model_type=model_type)
         print cmd
         instance._commit(cmd)
         tl.flush(cmdlist)
@@ -436,7 +436,7 @@ def get_obj(content, vimtype, name):
 
 
 # Connect to vCenter server and deploy a VM from template
-def clone(instance, instance_name, template_name, ip, gateway, flag, ipflag):
+def clone(instance, instance_name, template_name, ip, gateway, flag, ipflag, model_type):
 
     try:
         si = SmartConnect(
@@ -508,7 +508,7 @@ def clone(instance, instance_name, template_name, ip, gateway, flag, ipflag):
     time.sleep(60)
 
     # reconfigure host
-    reconfigure(instance, instance_name, ip, gateway, flag, ipflag)
+    reconfigure(instance, instance_name, ip, gateway, flag, ipflag, model_type)
 
 
 # set depoly instance policy
@@ -566,6 +566,7 @@ def main(**kwargs):
     template_name = kwargs['template']
     yhd_flag = kwargs['yhd']
     ipflag = kwargs['flag']
+    model_type = kwargs['model_type']
     print yhd_flag
     print template_name
 
@@ -591,7 +592,7 @@ def main(**kwargs):
         # if cluster_name:
             # template_name = clusters.get(cluster_name, None)['template_name']
         # print "template_name", template_name
-        clone(instance_db_handle, name, template_name, ip, gateway, yhd_flag, ipflag)
+        clone(instance_db_handle, name, template_name, ip, gateway, yhd_flag, ipflag, model_type)
         # ring_point += 1
         # time.sleep(3)
 
@@ -609,17 +610,22 @@ if __name__ == "__main__":
     parser.add_argument(
         '--number',
         type=int,
-        help='Number of CPUs',
+        help='Number of vms',
         default=2)
     parser.add_argument(
         '--template',
         type=str,
-        help='Number of CPUs',
+        help='type of system, eg: centos6.4|ubuntu12.04',
         default='centos6.4')
+    parser.add_argument(
+        '--model_type',
+        type=str,
+        help='type of category, eg: 8-8-200|8-64-300',
+        default='8-8-200')
     parser.add_argument(
         '--flag',
         type=str,
-        help='used for promote',
+        help='used for promote, flag is fixable|unfixable',
         default='unfixable')
 
     parser.add_argument('--yhd-flag', dest='yhd', action='store_true')
